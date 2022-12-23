@@ -1,4 +1,5 @@
 import React, {Component} from "react";
+import axios from "axios";
 
 import PortfolioItem from "./portfolio-item";
 
@@ -9,13 +10,10 @@ export default class PortfolioContainer extends Component {
         this.state = {
             pageTitle: "Welcome to my Portfolio",
             isLoading: false,
-            data: [
-                {title: "Quip", Category: "ecommerce", slug: 'quip'}, 
-                {title: "Eventbrite", Category: "Sched", slug: 'eventbrite'}, 
-                {title: "SwingAway", Category: "ecommerce", slug: 'swingaway'}
-            ]
+            data: []            
         };
         this.handleFilter = this.handleFilter.bind(this);
+        
          }
 
          handleFilter(filter) {
@@ -26,17 +24,45 @@ export default class PortfolioContainer extends Component {
             });
          }
 
-    portfolioItems() {
-        return this.state.data.map(item => {
-            return <PortfolioItem  title={item.title} url={"google.com"} slug={item.slug} />;
-        });
-    }
+         getPortfolioItems(){
+            axios.get("https://anthonyknoll.devcamp.space/portfolio/portfolio_items")
+          .then(response => {
+            // handle success
+            this.setState({
+                data: response.data.portfolio_items
+            })
+          })
+          .catch(error => {
+            // handle error
+            console.log(error);
+          })
+          .finally(function () {
+            // always executed
+          });
+        }
+
+          portfolioItems() {
+            return this.state.data.map(item => {
+              return (
+                <PortfolioItem 
+                    key={item.id} 
+                    title={item.name} 
+                    url={item.url} 
+                    slug={item.id} />
+              );
+            });
+          }
+
+    componentDidMount() {
+        this.getPortfolioItems();
+    }      
 
 
     render() {
         if (this.state.isLoading) {
             return <div>Loading...</div>;
         }
+       
     return (
         <div>
             <h2>{this.state.pageTitle}</h2>
